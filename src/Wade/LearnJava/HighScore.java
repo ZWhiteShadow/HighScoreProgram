@@ -116,8 +116,8 @@ public class HighScore {
                     String scoresText = JTextFieldScoresArray[i].getText();
                     String playersText = JTextFieldPlayersArray[i].getText();
 
-                    JTextFieldScoresArray[i].setBackground(new Color(204, 255, 255)); // light green
-                    JTextFieldPlayersArray[i].setBackground(new Color(204, 255, 255)); // light green
+                    JTextFieldScoresArray[i].setBackground(new Color(204, 255, 204)); // light green
+                    JTextFieldPlayersArray[i].setBackground(new Color(204, 255, 204)); // light green
 
                     try {
                         scoresArray[i] = Integer.parseInt(scoresText);
