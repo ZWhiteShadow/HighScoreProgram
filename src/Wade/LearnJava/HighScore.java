@@ -4,25 +4,34 @@ package Wade.LearnJava;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class HighScore {
 
+
     private final JTextField[] JTextFieldScoresArray;
     private final JTextField[] JTextFieldPlayersArray;
-    private final String[] sortedPlayersArray;
-    private final String[] unsortedPlayersArray;
+    private String[] sortedPlayersArray;
+    private String[] unsortedPlayersArray;
     private int[] unsortedScoresArray;
-    private final int[] scoresArray;
+    private int[] scoresArray;
     private int numberOfPlayers;
     private int[] newScoresArray;
+    boolean[] isErrorPlayersArray;
+    boolean[] isErrorScoresArray;
+    ArrayList<Integer> correctList;
+    String[] smallPlayersArray;
+    int[] smallScoresArray;
+    boolean useSmallArrays = false;
+
 
     public HighScore(boolean firstRun) {
-
         while (true) {
+            UIManager.put("OptionPane.minimumSize",new Dimension(375,100));
 
             if (firstRun) { //https://stackoverflow.com/questions/24970176/joptionpane-handling-ok-cancel-and-x-button
-                int n = JOptionPane.showOptionDialog(new JFrame(), "This Program Ranks Players By Score",
+                int n = JOptionPane.showOptionDialog(new JFrame(),  "This program ranks players by score",
                         "Welcome to the program", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
                         null, new Object[]{"Ok"}, JOptionPane.YES_OPTION);
                 if (n == JOptionPane.CLOSED_OPTION) {
@@ -41,7 +50,7 @@ public class HighScore {
                 if (choice == null) {
                     quit();
                 } else {
-                    int n = JOptionPane.showOptionDialog(new JFrame(), "Please enter a positive whole number",
+                    int n = JOptionPane.showOptionDialog(new JFrame(), "Please enter a whole positive whole number",
                             "Error!", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE,
                             null, new Object[]{"Ok"}, JOptionPane.YES_OPTION);
                     if (n == JOptionPane.CLOSED_OPTION) {
@@ -59,14 +68,18 @@ public class HighScore {
         unsortedScoresArray = new int[numberOfPlayers];
         scoresArray = new int[numberOfPlayers];
         newScoresArray = new int[numberOfPlayers];
+        isErrorPlayersArray = new boolean[numberOfPlayers];
+        isErrorScoresArray =  new boolean[numberOfPlayers];
 
         for (int i = 0; i < numberOfPlayers; i++) {
             JTextFieldScoresArray[i] = new JTextField(10);
             JTextFieldPlayersArray[i] = new JTextField(10);
         }
         if (firstRun) {
-            JOptionPane.showMessageDialog(null, "Please enter in " + numberOfPlayers + " players and scores:\n\nOnly use small, whole, positive, numbers, with no commas.\n" +
-                            "Players names must be Alphanumeric. Fill out all the boxes.",
+            JOptionPane.showMessageDialog(null,
+                    "Please fill out all "  + numberOfPlayers + " boxes:\n\n" +
+                            "Players: Letters only\n" +
+                            "Scores: Whole, positive numbers, with no commas.\n",
                     "Please read. Instructions:", JOptionPane.PLAIN_MESSAGE);
         }
     }
@@ -94,7 +107,7 @@ public class HighScore {
             int selection = JOptionPane.showOptionDialog(null, getPanel(), "Enter Name And Scores To Rank: ",
                     JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
                     null, options, null);
-            if ( selection ==  JOptionPane.CLOSED_OPTION ) {
+            if (selection == JOptionPane.CLOSED_OPTION) {
                 quit();
             }
             if (selection == 1) {
@@ -111,6 +124,8 @@ public class HighScore {
                     count[i] = 0;
                 }
 
+                correctList = new ArrayList<Integer>();
+
                 for (int i = 0; i < numberOfPlayers; i++) {
 
                     String scoresText = JTextFieldScoresArray[i].getText();
@@ -118,6 +133,11 @@ public class HighScore {
 
                     JTextFieldScoresArray[i].setBackground(new Color(204, 255, 204)); // light green
                     JTextFieldPlayersArray[i].setBackground(new Color(204, 255, 204)); // light green
+                    isErrorPlayersArray[i] = false;
+                    isErrorScoresArray[i] = false;
+
+                    JTextField green = new JTextField();
+                    green.setBackground(new Color(204, 255, 204));
 
                     try {
                         scoresArray[i] = Integer.parseInt(scoresText);
@@ -156,6 +176,7 @@ public class HighScore {
                             count[5] += 1;
                         }
                         isError = true;
+                        isErrorScoresArray[i] = true;
                     }
                     if (playersText.length() > 15) {
                         playersText = playersText.substring(0, 15);
@@ -166,13 +187,19 @@ public class HighScore {
                         message[6] = " were blank.\n";
                         count[6] += 1;
                         isError = true;
+                        isErrorPlayersArray[i] = true;
                         JTextFieldPlayersArray[i].setBackground(new Color(255, 255, 204)); //light yellow
-                    } else if (!playersText.matches("^[a-zA-Z0-9]+$") || // 0letters and/or numbers only
-                                playersText.matches("^[0-9]*$")) { // only numbers
-                        message[7] = " were not alphanumeric.\n";
+                    } else if (!playersText.matches("[a-zA-Z]")){ // only letters
+                        message[7] = " were not letters only.\n";
                         count[7] += 1;
                         isError = true;
+                        isErrorPlayersArray[i] = true;
                         JTextFieldPlayersArray[i].setBackground(new Color(255, 204, 204)); // light pink
+
+                    }
+
+                    if ((isErrorPlayersArray[i] == false) && (isErrorScoresArray[i] == false)) {
+                        correctList.add(i);
                     }
                 }
 
@@ -198,12 +225,31 @@ public class HighScore {
                 }
                 fullMessage.append(message[6]).append(message[7]);
 
+                if ((correctList.size() > 1) && (correctList.size() != numberOfPlayers)) {
+                    int understand = JOptionPane.showConfirmDialog(null, "You have completed " + correctList.size() +
+                                    " out of " + numberOfPlayers + " players.\n\n Do you want to rank only these?\n\n", "You have partially completed the form:",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE);
+
+                    if (understand == JOptionPane.YES_OPTION) {
+                        smallPlayersArray = new String[correctList.size()];
+                        smallScoresArray = new int[correctList.size()];
+                        for (int i = 0; i < correctList.size(); i++) {
+                            smallPlayersArray[i] = JTextFieldPlayersArray[correctList.get(i)].getText();
+                            smallScoresArray[i] = Integer.parseInt(JTextFieldScoresArray[correctList.get(i)].getText());
+                        }
+                        useSmallArrays = true;
+                        break;
+                    }
+                }
+
+
                 if (isError) {
-                    int understand = JOptionPane.showConfirmDialog(null, "The Following Error(s) were found in the program:\n" +
+                    int understand = JOptionPane.showConfirmDialog(null, "The Following Error(s) were found in the program:\n\n" +
                                     "Will you correct the following?\n\n" + fullMessage, "Welcome to \"Advanced Error Reporting\" ©2021",
                             JOptionPane.YES_NO_OPTION,
                             JOptionPane.QUESTION_MESSAGE);
-                    if ( (understand == JOptionPane.CLOSED_OPTION) || (understand == JOptionPane.NO_OPTION) ) {
+                    if ((understand == JOptionPane.CLOSED_OPTION) || (understand == JOptionPane.NO_OPTION)) {
                         quit();
                     }
                 } else {
@@ -211,6 +257,14 @@ public class HighScore {
                 }
             }
         }
+
+        if (useSmallArrays) {
+            scoresArray = smallScoresArray;
+            unsortedPlayersArray = smallPlayersArray;
+            numberOfPlayers = correctList.size();
+            sortedPlayersArray = new String[correctList.size()];
+        }
+
         unsortedScoresArray = scoresArray.clone(); //Keep a copy of the original using clone otherwise would change with sort
         Arrays.sort(scoresArray); // change original array and sort in order - lowest to highest
         newScoresArray = scoresArray.clone(); //Created due to duplicates
@@ -246,18 +300,9 @@ public class HighScore {
                 //
             }
         }
-
-        try {
-            for (int i = 0; i < numberOfPlayers; i++) {
-                scoresArray[i] = Integer.parseInt(JTextFieldScoresArray[i].getText());
-                unsortedPlayersArray[i] = JTextFieldPlayersArray[i].getText();
-            }
-            JOptionPane.showMessageDialog(null, rankList.toString(), "Your Players Ranked: ", JOptionPane.PLAIN_MESSAGE);
-            if(quit()){
-                SwingUtilities.invokeLater(() -> new HighScore(false).displayGUI());
-            }
-        } catch (Exception e) {
-            //Do nothing
+        JOptionPane.showMessageDialog(null, rankList.toString(), "Your Players Ranked: ", JOptionPane.PLAIN_MESSAGE);
+        if (quit()) {
+            SwingUtilities.invokeLater(() -> new HighScore(false).displayGUI());
         }
     }
 
