@@ -190,7 +190,7 @@ public class HighScore {
                         isError = true;
                         isErrorPlayersArray[i] = true;
                         JTextFieldPlayersArray[i].setBackground(new Color(255, 255, 204)); //light yellow
-                    } else if (!playersText.matches("^[a-zA-Z\\s]*$")){ // letters and spaces only
+                    } else if (!playersText.matches("[a-zA-Z]+")){ // letters only
                         message[7] = " were not letters only.\n";
                         count[7] += 1;
                         isError = true;
@@ -237,7 +237,12 @@ public class HighScore {
                         smallScoresArray = new int[correctList.size()];
                         for (int i = 0; i < correctList.size(); i++) {
                             String tempText = JTextFieldPlayersArray[correctList.get(i)].getText(); // change to length of ten
-                            smallPlayersArray[i] = tempText.substring(0, 10); //store new length
+
+                            int tempSize = 10;
+                            if (tempText.length() < 10){
+                                tempSize = tempText.length();
+                            }
+                            smallPlayersArray[i] = tempText.substring(0, tempSize); //store new length
                             smallScoresArray[i] = Integer.parseInt(JTextFieldScoresArray[correctList.get(i)].getText());
                         }
                         useSmallArrays = true;
