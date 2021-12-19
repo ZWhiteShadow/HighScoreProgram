@@ -178,18 +178,19 @@ public class HighScore {
                         isError = true;
                         isErrorScoresArray[i] = true;
                     }
-                    if (playersText.length() > 15) {
-                        playersText = playersText.substring(0, 15);
+                    if (playersText.length() > 10) {
+                        playersText = playersText.substring(0, 10);
                     }
 
-                    unsortedPlayersArray[i] = playersText; // First 15 characters
+                    unsortedPlayersArray[i] = playersText; // First 15
+
                     if (playersText.equals("")) {
                         message[6] = " were blank.\n";
                         count[6] += 1;
                         isError = true;
                         isErrorPlayersArray[i] = true;
                         JTextFieldPlayersArray[i].setBackground(new Color(255, 255, 204)); //light yellow
-                    } else if (!playersText.matches("[a-zA-Z]")){ // only letters
+                    } else if (!playersText.matches("^[a-zA-Z\\s]*$")){ // letters and spaces only
                         message[7] = " were not letters only.\n";
                         count[7] += 1;
                         isError = true;
@@ -235,7 +236,8 @@ public class HighScore {
                         smallPlayersArray = new String[correctList.size()];
                         smallScoresArray = new int[correctList.size()];
                         for (int i = 0; i < correctList.size(); i++) {
-                            smallPlayersArray[i] = JTextFieldPlayersArray[correctList.get(i)].getText();
+                            String tempText = JTextFieldPlayersArray[correctList.get(i)].getText(); // change to length of ten
+                            smallPlayersArray[i] = tempText.substring(0, 10); //store new length
                             smallScoresArray[i] = Integer.parseInt(JTextFieldScoresArray[correctList.get(i)].getText());
                         }
                         useSmallArrays = true;
